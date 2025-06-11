@@ -19,6 +19,12 @@ Chạy lệnh sau để cài đặt công cụ:
 sudo bash install.sh
 ```
 
+hoặc có thể chạy 1 lệnh duy nhất sau (ưu tiên hơn)
+
+```bash
+sudo bash -c 'URL=https://cloudfly.vn/download/n8n-panel/install.sh && if [ -f /usr/bin/curl ];then curl -ksSO $URL ;else wget --no-check-certificate -O install.sh $URL;fi;bash install.sh'
+```
+
 ### 2. Các chức năng chính
 
 Sau khi cài đặt, bạn có thể sử dụng công cụ bằng cách chạy lệnh:
