@@ -23,7 +23,7 @@ sudo bash install.sh
 hoặc có thể chạy 1 lệnh duy nhất sau (ưu tiên hơn)
 
 ```bash
-sudo bash -c 'URL=https://cloudfly.vn/download/n8n-panel/install.sh && if [ -f /usr/bin/curl ];then curl -ksSO $URL ;else wget --no-check-certificate -O install.sh $URL;fi;bash install.sh'
+sudo bash -c 'URL=https://cloudfly.vn/download/n8n-host/install.sh && if [ -f /usr/bin/curl ];then curl -ksSO $URL ;else wget --no-check-certificate -O install.sh $URL;fi;bash install.sh'
 ```
 
 ### 2. Các chức năng chính
