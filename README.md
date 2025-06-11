@@ -4,7 +4,7 @@
 
 N8N Cloud Manager là công cụ hỗ trợ quản lý N8N trên CloudFly, bao gồm các chức năng như cài đặt, nâng cấp, xuất/nhập dữ liệu, và cấu hình hệ thống.
 
-Phát triển bởi [CloudFly](https://cloudfly.vn)
+Phát triển bởi   
 ![CloudFly Logo](https://cloudfly.vn/_next/image?url=%2Fimage%2Flogo%2Flogo.webp&w=256&q=75)
 
 ---
