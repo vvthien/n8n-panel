@@ -8,7 +8,7 @@ CYAN='\e[1;36m'    # Mau xanh cyan (dam)
 NC='\e[0m'        # Reset mau (tro ve binh thuong)
 
 # --- Bien Global ---
-N8N_DIR="/n8n-cloud"
+N8N_DIR="/n8n-cloud" # Thu muc chua toan bo cai dat N8N
 ENV_FILE="${N8N_DIR}/.env"
 DOCKER_COMPOSE_FILE="${N8N_DIR}/docker-compose.yml"
 DOCKER_COMPOSE_CMD="docker compose" 

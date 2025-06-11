@@ -12,7 +12,7 @@ NC='\e[0m'
 # !!! THAY DOI URL NAY thanh link tai script cua ban !!!
 SCRIPT_URL="https://cloudfly.vn/download/n8n-host/n8n-host.sh" # VI DU: Link raw GitHub
 
-SCRIPT_NAME="n8n-host"
+SCRIPT_NAME="n8n-host" #path/to/script/name
 # Khuyen nghi dung /usr/local/bin cho script tuy chinh
 INSTALL_DIR="/usr/local/bin"
 INSTALL_PATH="${INSTALL_DIR}/${SCRIPT_NAME}"
