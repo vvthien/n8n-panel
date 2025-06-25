@@ -1389,6 +1389,168 @@ import_data() {
     read -r
 }
 
+# --- Ham Quan Ly NocoDB ---
+manage_nocodb() {
+  local nocodb_dir="/nocodb-cloud"
+  local nocodb_container_name="nocodb_app"
+  local nocodb_docker_compose_file="${nocodb_dir}/docker-compose.yml"
+
+  while true; do
+    clear
+    echo -e "${CYAN}+-----------------------------+${NC}"
+    echo -e "${CYAN}|       Quan Ly NocoDB        |${NC}"
+    echo -e "${CYAN}+-----------------------------+${NC}"
+    echo ""
+    echo -e " ${YELLOW}Phim tat: Nhan Ctrl + C hoac nhap 0 de quay lai menu chinh${NC}"
+    echo "-----------------------------------"
+    if [ -f "${nocodb_docker_compose_file}" ]; then
+      echo -e " ${GREEN}NocoDB da duoc cai dat.${NC}"
+      echo -e " 1) Xem thong tin NocoDB"
+      echo -e " 2) Go cai dat NocoDB"
+      echo -e " 3) Khoi dong lai NocoDB"
+    else
+      echo -e " ${RED}NocoDB chua duoc cai dat.${NC}"
+      echo -e " 1) Cai dat NocoDB"
+    fi
+    echo "-----------------------------------"
+    read -p "$(echo -e ${CYAN}'Nhap lua chon cua ban (1-3) [ 0 = Quay lai ]: '${NC})" nocodb_choice
+    echo ""
+
+    case "$nocodb_choice" in
+      1)
+        if [ -f "${nocodb_docker_compose_file}" ]; then
+          view_nocodb_info
+        else
+          install_nocodb
+        fi
+        ;;
+      2)
+        if [ -f "${nocodb_docker_compose_file}" ]; then
+          uninstall_nocodb
+        else
+          echo -e "${RED}[!] Lua chon khong hop le.${NC}"
+        fi
+        ;;
+      3)
+        if [ -f "${nocodb_docker_compose_file}" ]; then
+          restart_nocodb
+        else
+          echo -e "${RED}[!] Lua chon khong hop le.${NC}"
+        fi
+        ;;
+      0)
+        return 0
+        ;;
+      *)
+        echo -e "${RED}[!] Lua chon khong hop le. Vui long chon lai.${NC}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
+install_nocodb() {
+  check_root
+  echo -e "\n${CYAN}--- Cai Dat NocoDB ---${NC}"
+
+  local nocodb_dir="/nocodb-cloud"
+  local nocodb_container_name="nocodb_app"
+  local nocodb_docker_compose_file="${nocodb_dir}/docker-compose.yml"
+
+  start_spinner "Thiet lap thu muc va file cau hinh..."
+  if [ ! -d "${nocodb_dir}" ]; then
+    sudo mkdir -p "${nocodb_dir}"
+  fi
+  stop_spinner
+
+  start_spinner "Tao file docker-compose.yml cho NocoDB..."
+  sudo bash -c "cat > ${nocodb_docker_compose_file}" <<EOF
+version: '3.8'
+
+services:
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: ${nocodb_container_name}
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      NC_DB: "sqlite"
+EOF
+  stop_spinner
+
+  start_spinner "Khoi dong NocoDB..."
+  cd "${nocodb_dir}" || { echo -e "${RED}Khong the truy cap thu muc ${nocodb_dir}.${NC}"; return 1; }
+  run_silent_command "Tai Docker images" "docker compose pull" "false"
+  run_silent_command "Khoi dong container" "docker compose up -d" "false"
+  stop_spinner
+
+  echo -e "${GREEN}NocoDB da duoc cai dat thanh cong!${NC}"
+  echo -e "Ban co the truy cap NocoDB tai: ${GREEN}http://<IP-Server>:8080${NC}"
+}
+
+uninstall_nocodb() {
+  check_root
+  echo -e "\n${CYAN}--- Go Cai Dat NocoDB ---${NC}"
+
+  local nocodb_dir="/nocodb-cloud"
+  local nocodb_container_name="nocodb_app"
+  local nocodb_docker_compose_file="${nocodb_dir}/docker-compose.yml"
+
+  if [ -f "${nocodb_docker_compose_file}" ]; then
+    cd "${nocodb_dir}" || { echo -e "${RED}Khong the truy cap thu muc ${nocodb_dir}.${NC}"; return 1; }
+    run_silent_command "Dung container NocoDB" "docker compose down -v" "false"
+    cd - > /dev/null
+    sudo rm -rf "${nocodb_dir}"
+    echo -e "${GREEN}NocoDB da duoc go cai dat thanh cong.${NC}"
+  else
+    echo -e "${RED}NocoDB chua duoc cai dat.${NC}"
+  fi
+
+  echo -e "${YELLOW}Nhan Enter de quay lai menu...${NC}"
+  read -r
+}
+
+view_nocodb_info() {
+  check_root
+  echo -e "\n${CYAN}--- Xem Thong Tin NocoDB ---${NC}"
+
+  local nocodb_container_name="nocodb_app"
+
+  if docker ps -q -f "name=${nocodb_container_name}" &>/dev/null; then
+    echo -e "${GREEN}NocoDB dang chay.${NC}"
+    docker inspect "${nocodb_container_name}" | grep "IPAddress" | head -n 1
+  else
+    echo -e "${RED}NocoDB chua duoc khoi dong. Vui long kiem tra trang thai container.${NC}"
+  fi
+
+  echo -e "${YELLOW}Nhan Enter de quay lai menu...${NC}"
+  read -r
+}
+
+restart_nocodb() {
+  check_root
+  echo -e "\n${CYAN}--- Khoi Dong Lai NocoDB ---${NC}"
+
+  local nocodb_container_name="nocodb_app"
+
+  if docker ps -q -f "name=${nocodb_container_name}" &>/dev/null; then
+    start_spinner "Dang khoi dong lai NocoDB..."
+    if sudo docker restart "${nocodb_container_name}" &>/dev/null; then
+      stop_spinner
+      echo -e "${GREEN}NocoDB da duoc khoi dong lai thanh cong.${NC}"
+    else
+      stop_spinner
+      echo -e "${RED}Loi khi khoi dong lai NocoDB.${NC}"
+    fi
+  else
+    echo -e "${RED}NocoDB chua duoc khoi dong. Vui long kiem tra trang thai container.${NC}"
+  fi
+
+  echo -e "${YELLOW}Nhan Enter de quay lai menu...${NC}"
+  read -r
+}
+
 uninstall() {
     echo -e "\n${YELLOW}[*] Dang kiem tra va go bo cong cu tai: ${INSTALL_PATH}${NC}"
     if [[ -f "$INSTALL_PATH" ]]; then
