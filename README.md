@@ -4,11 +4,10 @@
 
 N8N Cloud Manager là công cụ hỗ trợ quản lý N8N trên CloudFly, bao gồm các chức năng như cài đặt, nâng cấp, xuất/nhập dữ liệu, và cấu hình hệ thống.
 
-Phát triển bởi   
+Phát triển bởi
 ![CloudFly Logo](https://cloudfly.vn/_next/image?url=%2Fimage%2Flogo%2Flogo.webp&w=256&q=75)
 
-![CloudFly n8n panel screenshot](https://media.cloudfly.vn/posts/image_2025-05-27_17-32-13.png)
----
+## ![CloudFly n8n panel screenshot](https://media.cloudfly.vn/posts/image_2025-05-27_17-32-13.png)
 
 ## Cách sử dụng
 
@@ -46,7 +45,8 @@ Công cụ sẽ hiển thị menu chính với các chức năng sau:
 | 6      | Export tất cả (workflows & credentials)    |
 | 7      | Import workflows & credentials từ template |
 | 8      | Lấy thông tin Redis                        |
-| 9      | Xóa N8N và cài đặt lại                     |
+| 9      | Quản lý NocoDB                             |
+| 10     | Xóa N8N và cài đặt lại                     |
 
 ---
 
@@ -95,9 +95,20 @@ Công cụ sẽ hiển thị menu chính với các chức năng sau:
 1. Chọn `8) Lấy thông tin Redis` từ menu.
 2. Công cụ sẽ hiển thị thông tin kết nối Redis.
 
+#### **Quản lý NocoDB**
+
+1. Chọn `9) Quản lý NocoDB` từ menu.
+2. Nếu NocoDB chưa được cài đặt:
+   - Chọn `1) Cài đặt NocoDB`.
+   - Công cụ sẽ tự động cài đặt và cấu hình NocoDB.
+3. Nếu NocoDB đã được cài đặt:
+   - Chọn `1) Xem thông tin NocoDB` để hiển thị thông tin kết nối.
+   - Chọn `2) Gỡ cài đặt NocoDB` để xóa NocoDB.
+   - Chọn `3) Khởi động lại NocoDB` để khởi động lại NocoDB.
+
 #### **Xóa N8N và cài đặt lại**
 
-1. Chọn `9) Xóa N8N và cài đặt lại` từ menu.
+1. Chọn `10) Xóa N8N và cài đặt lại` từ menu.
 2. Công cụ sẽ xóa toàn bộ dữ liệu và cài đặt lại N8N từ đầu.
 
 ---

@@ -141,8 +141,8 @@ install_script() {
 # Kiem tra xem script da duoc cai dat chua
 if [[ -f "$INSTALL_PATH" ]]; then
     echo -e "${YELLOW}[!] Cong cu '${SCRIPT_NAME}' duong nhu da duoc cai dat tai '${INSTALL_PATH}'.${NC}"
-    echo -e "Neu ban muon cai dat lai, hay chay: ${CYAN}bash $0 --force-install${NC}"
-    echo -e "Neu ban muon go bo, hay chay: ${CYAN}${SCRIPT_NAME} --uninstall${NC}"
+    echo -e "Neu ban muon cai dat lai, hay chay: ${CYAN}bash $0 --uninstall${NC}"
+    echo -e "Sau do chay lai lenh hien tai."
     exit 1
 else
     # Neu chua cai dat, tien hanh cai dat

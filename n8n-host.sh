@@ -1392,7 +1392,7 @@ import_data() {
 # --- Ham Quan Ly NocoDB ---
 manage_nocodb() {
   local nocodb_dir="/nocodb-cloud"
-  local nocodb_container_name="nocodb_app"
+  local nocodb_container_name="nocodb"
   local nocodb_docker_compose_file="${nocodb_dir}/docker-compose.yml"
 
   while true; do
@@ -1406,8 +1406,8 @@ manage_nocodb() {
     if [ -f "${nocodb_docker_compose_file}" ]; then
       echo -e " ${GREEN}NocoDB da duoc cai dat.${NC}"
       echo -e " 1) Xem thong tin NocoDB"
-      echo -e " 2) Go cai dat NocoDB"
-      echo -e " 3) Khoi dong lai NocoDB"
+      echo -e " 2) Khoi dong lai NocoDB"
+      echo -e "${RED} 3) Go cai dat NocoDB${NC}"
     else
       echo -e " ${RED}NocoDB chua duoc cai dat.${NC}"
       echo -e " 1) Cai dat NocoDB"
@@ -1426,14 +1426,14 @@ manage_nocodb() {
         ;;
       2)
         if [ -f "${nocodb_docker_compose_file}" ]; then
-          uninstall_nocodb
+          restart_nocodb
         else
           echo -e "${RED}[!] Lua chon khong hop le.${NC}"
         fi
         ;;
       3)
         if [ -f "${nocodb_docker_compose_file}" ]; then
-          restart_nocodb
+          uninstall_nocodb
         else
           echo -e "${RED}[!] Lua chon khong hop le.${NC}"
         fi
@@ -1454,8 +1454,14 @@ install_nocodb() {
   echo -e "\n${CYAN}--- Cai Dat NocoDB ---${NC}"
 
   local nocodb_dir="/nocodb-cloud"
-  local nocodb_container_name="nocodb_app"
+  local nocodb_container_name="nocodb"
+  local db_container_name="nocodb_db"
   local nocodb_docker_compose_file="${nocodb_dir}/docker-compose.yml"
+
+  # Tao thong tin dang nhap ngau nhien
+  local db_user="nocodbuser"
+  local db_pass=$(generate_random_string 16)
+  local jwt_secret=$(generate_random_string 32)
 
   start_spinner "Thiet lap thu muc va file cau hinh..."
   if [ ! -d "${nocodb_dir}" ]; then
@@ -1466,16 +1472,41 @@ install_nocodb() {
   start_spinner "Tao file docker-compose.yml cho NocoDB..."
   sudo bash -c "cat > ${nocodb_docker_compose_file}" <<EOF
 version: '3.8'
-
 services:
   nocodb:
     image: nocodb/nocodb:latest
     container_name: ${nocodb_container_name}
-    restart: always
     ports:
       - "8080:8080"
+    volumes:
+      - nocodb_data:/usr/app/data
     environment:
-      NC_DB: "sqlite"
+      - NC_DB=pg://db:5432?u=${db_user}&p=${db_pass}&d=nocodb
+      - NC_AUTH_JWT_SECRET=${jwt_secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: ${db_container_name}
+    environment:
+      - POSTGRES_DB=nocodb
+      - POSTGRES_USER=${db_user}
+      - POSTGRES_PASSWORD=${db_pass}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${db_user}", "-d", "nocodb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  nocodb_data:
+  db_data:
 EOF
   stop_spinner
 
@@ -1486,15 +1517,14 @@ EOF
   stop_spinner
 
   echo -e "${GREEN}NocoDB da duoc cai dat thanh cong!${NC}"
-  echo -e "Ban co the truy cap NocoDB tai: ${GREEN}http://<IP-Server>:8080${NC}"
+  echo -e "Ban co the truy cap NocoDB tai: ${GREEN}http://$(get_public_ip):8080${NC}"
 }
-
 uninstall_nocodb() {
   check_root
   echo -e "\n${CYAN}--- Go Cai Dat NocoDB ---${NC}"
 
   local nocodb_dir="/nocodb-cloud"
-  local nocodb_container_name="nocodb_app"
+  local nocodb_container_name="nocodb"
   local nocodb_docker_compose_file="${nocodb_dir}/docker-compose.yml"
 
   if [ -f "${nocodb_docker_compose_file}" ]; then
@@ -1515,11 +1545,14 @@ view_nocodb_info() {
   check_root
   echo -e "\n${CYAN}--- Xem Thong Tin NocoDB ---${NC}"
 
-  local nocodb_container_name="nocodb_app"
+  local nocodb_container_name="nocodb"
+  local server_ip
 
+  server_ip=$(get_public_ip)
   if docker ps -q -f "name=${nocodb_container_name}" &>/dev/null; then
     echo -e "${GREEN}NocoDB dang chay.${NC}"
-    docker inspect "${nocodb_container_name}" | grep "IPAddress" | head -n 1
+    echo -e "Port: ${YELLOW}8080${NC}"
+    echo -e "Truy cap NocoDB tai: ${YELLOW}http://${server_ip}:8080${NC}"
   else
     echo -e "${RED}NocoDB chua duoc khoi dong. Vui long kiem tra trang thai container.${NC}"
   fi
@@ -1532,7 +1565,7 @@ restart_nocodb() {
   check_root
   echo -e "\n${CYAN}--- Khoi Dong Lai NocoDB ---${NC}"
 
-  local nocodb_container_name="nocodb_app"
+  local nocodb_container_name="nocodb"
 
   if docker ps -q -f "name=${nocodb_container_name}" &>/dev/null; then
     start_spinner "Dang khoi dong lai NocoDB..."
@@ -1602,10 +1635,10 @@ show_menu() {
   printf " %-3s %-35s %-3s ${YELLOW}%s${NC}\n" "1)" "Cai dat N8N" "6)" "Export tat ca (workflow & credentials)" 
   printf " %-3s %-35s %-3s %s\n" "2)" "Thay doi ten mien" "7)" "Import workflow & credentials"
   printf " %-3s %-35s %-3s ${GREEN}%s${NC}\n" "3)" "Nang cap phien ban N8N" "8)" "Lay thong tin Redis" 
-  printf " %-3s %-35s %-3s ${RED}%s${NC}\n" "4)" "Tat xac thuc 2 buoc (2FA/MFA)" "9)" "Xoa N8N va cai dat lai" 
-  printf " %-3s %-35s %-3s %s\n" "5)" "Dat lai thong tin dang nhap"
+  printf " %-3s %-35s %-3s ${GREEN}%s${NC}\n" "4)" "Tat xac thuc 2 buoc (2FA/MFA)" "9)" "Quan ly NocoDB" 
+  printf " %-3s %-35s %-3s ${RED}%s${NC}\n" "5)" "Dat lai thong tin dang nhap" "10)" "Xoa N8N va cai dat lai" 
   echo "------------------------------------------------------------------------------------"
-  read -p "$(echo -e ${CYAN}'Nhap lua chon cua ban (1-9) [ 0 = Thoat ]: '${NC})" choice
+  read -p "$(echo -e ${CYAN}'Nhap lua chon cua ban (1-10) [ 0 = Thoat ]: '${NC})" choice
   echo ""
 }
 
@@ -1620,8 +1653,9 @@ while true; do
     5) reset_user_login ;;    
     6) export_all_data ;;    
     7) import_data ;; 
-    8) get_redis_info ;;  
-    9) reinstall_n8n ;;   
+    8) get_redis_info ;; 
+    9) manage_nocodb ;;   
+    10) reinstall_n8n ;; 
     *) 
       if [[ "$choice" == "0" ]]; then
         echo "Tam biet!"
