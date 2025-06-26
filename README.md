@@ -9,6 +9,12 @@ Phát triển bởi
 
 ## ![CloudFly n8n panel screenshot](https://i.ibb.co/2YMYwK2g/image-2025-06-26-14-45-32-1.png)
 
+
+## Cấu hình và hệ điều hành
+- Cấu hình tối thiểu để chạy là: `1-1-20 (khuyến khích 2-2-20)`
+- Hệ điều hành: `Ubuntu (ưu tiên version 20, 22, 24)`
+
+
 ## Cách sử dụng
 
 ### 1. Cài đặt công cụ
